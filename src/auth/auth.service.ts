@@ -1,7 +1,7 @@
 import { ForbiddenException, BadRequestException, Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ISignin } from './interfaces';
 import { Tokens } from './types';
 import { Student, StudentLean } from 'src/student/types';
@@ -16,9 +16,18 @@ export class AuthService {
     constructor(private jwtService: JwtService,
         private studentService: StudentService){}
 
-    async sendToken(user?: StudentLean): Promise<Tokens> {
+    async sendToken(user?: StudentLean, req?: Request, res?: Response): Promise<Tokens> {
         const tokens = await this.getTokens(user.student_id.toString() || '', user.email || '')
         /* await this.updateAtHash(user.student_id, tokens.access_token) */
+              // Store it on session object
+      req.session['jwt'] =  tokens.access_token;
+
+      res.cookie('jwt', tokens.access_token, {
+        expires: new Date(Date.now() + (60 * 60 * 1000)),
+        httpOnly: true, // This will ensure the cookie can not be modified or access in any way by the browser,
+        secure: req.secure || req.headers['x-forwarded-proto'] === 'https' // This will make sure the cookie is send only on encrypted connection (https)
+      });
+        
         return tokens;
     }
 
@@ -49,7 +58,7 @@ export class AuthService {
     }
 
     /** API to login student using email id **/
-    async signinLocal(data: ISignin, res: Response) {
+    async signinLocal(data: ISignin, req: Request, res: Response) {
         
         const user = await this.studentService.findByEmail(data.email, {
             student_id: 1,
@@ -67,7 +76,7 @@ export class AuthService {
         }
         delete user.password;
         
-        const token = await this.sendToken(user);
+        const token = await this.sendToken(user, req, res);
 
 
         const dataToSet = {
@@ -106,7 +115,7 @@ export class AuthService {
     }
 
     /** API to login student using email id **/
-    async loginWithPhone(data: ISignin, res: Response) {
+    async loginWithPhone(data: ISignin, req: Request, res: Response) {
         data.phone = data.phone.replace(/\s+/g, '');
 
 
@@ -127,7 +136,7 @@ export class AuthService {
     
         
         
-        const token = await this.sendToken(user);
+        const token = await this.sendToken(user, req,res);
 
         const dataToSet = {
             $set: {

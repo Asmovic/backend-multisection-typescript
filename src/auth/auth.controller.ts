@@ -31,7 +31,7 @@ export class AuthController {
         let ip = req.ip || requestIp.getClientIp(req) || "IP ADDRESS MISSING";
         ip = ip.replace("::ffff:", "");
         req.body.ip = ip;
-        return this.authService.signinLocal({email, password}, res);
+        return this.authService.signinLocal({email, password}, req, res);
     }
 
     @Put('update-access-token')
@@ -60,7 +60,7 @@ export class AuthController {
         let ip = req.ip || requestIp.getClientIp(req) || "IP ADDRESS MISSING";
         ip = ip.replace("::ffff:", "");
         req.body.ip = ip;
-        return this.authService.loginWithPhone(dto, res);
+        return this.authService.loginWithPhone(dto, req, res);
     }
 
 /*     @Post('logout')

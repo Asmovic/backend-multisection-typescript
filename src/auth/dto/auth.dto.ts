@@ -2,18 +2,10 @@ import { IsEmail, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Types } from "mongoose";
 
 export class SigninDto {
-    @IsNotEmpty()
-    @IsString()
-    @IsEmail()
     email: string;
-    
-    @IsNotEmpty()
-    @IsString()
     password: string;
-
-    @IsNotEmpty()
-    @IsString()
-    phone: string;
+    phone: string
+    token: string;
 }
 
 export class UpdateAccessTokenDto {

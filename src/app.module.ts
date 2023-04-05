@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -10,7 +11,7 @@ import { AtGuard } from './common/guards';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [ThrottlerModule.forRoot({
+  imports: [ConfigModule.forRoot(), ThrottlerModule.forRoot({
     ttl: 60,
     limit: 10,
   }), MongooseModule.forRoot(config.mongoURI), StudentModule, AuthModule],
